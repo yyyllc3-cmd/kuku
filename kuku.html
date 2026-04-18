@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="九九マスター">
+<title>九九マスター</title>
+<style>
+  :root {
+    --sky: #4FC3F7;
+    --sky-dark: #0288D1;
+    --sun: #FFD54F;
+    --sun-dark: #F57F17;
+    --mint: #80CBC4;
+    --mint-dark: #00695C;
+    --coral: #FF8A65;
+    --coral-dark: #BF360C;
+    --lavender: #CE93D8;
+    --lavender-dark: #6A1B9A;
+    --grass: #AED581;
+    --grass-dark: #33691E;
+    --bg: #FFF9F0;
+    --card: #FFFFFF;
+    --text: #3E2723;
+    --muted: #8D6E63;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Hiragino Maru Gothic ProN', 'Hiragino Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--sky) 0%, var(--lavender) 100%);
+    padding: 14px 16px 12px;
+    text-align: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .header h1 { font-size: 22px; color: #fff; font-weight: 700; letter-spacing: 3px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .header .star { position: absolute; font-size: 20px; top: 12px; }
+  .header .star.left { left: 16px; }
+  .header .star.right { right: 16px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 2px solid #F0E6DC;
+    flex-shrink: 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 0;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .tab.active { color: var(--sky-dark); border-color: var(--sky-dark); }
+
+  /* Panels */
+  .panels {}
+  .panel { display: none; padding: 12px; }
+  .panel.active { display: block; }
+
+  /* ===== TABLE PANEL ===== */
+  .table-hint { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 8px; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { border-collapse: separate; border-spacing: 3px; width: 100%; }
+  th {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--sky-dark);
+    padding: 6px 4px;
+    border-radius: 8px;
+    min-width: 34px;
+    text-align: center;
+  }
+  td {
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    padding: 5px 3px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1.5px solid #F0E6DC;
+    cursor: pointer;
+    transition: transform 0.1s;
+    min-width: 52px;
+    line-height: 1.4;
+  }
+  .cell-eq { font-size: 10px; color: #A0897A; font-weight: 500; display: block; }
+  .cell-ans { font-size: 14px; color: var(--text); font-weight: 700; display: block; }
+  td.hl-row .cell-eq { color: #5C84B0; }
+  td.hl-col .cell-eq { color: #9070A0; }
+  td.hl-cell .cell-eq { color: var(--sun-dark); }
+  td.hl-row .cell-ans { color: #0D47A1; }
+  td.hl-col .cell-ans { color: #4A148C; }
+  td.hl-cell .cell-ans { color: var(--sun-dark); }
+  td:active { transform: scale(0.92); }
+  td.hl-row { background: #E3F2FD; border-color: #90CAF9; color: #0D47A1; }
+  td.hl-col { background: #F3E5F5; border-color: #CE93D8; color: #4A148C; }
+  td.hl-cell { background: var(--sun); border-color: var(--sun-dark); color: var(--sun-dark); transform: scale(1.12); z-index: 1; position: relative; box-shadow: 0 3px 10px rgba(255,213,79,0.6); }
+  th.hl-h { background: var(--sun-dark); }
+
+  /* ===== HIDDEN TABLE PANEL ===== */
+  .hide-hint { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 6px; }
+  .hide-reset { display: block; margin: 0 auto 10px; padding: 7px 20px; border-radius: 20px; border: 2px solid #E0D0C8; background: #fff; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .hide-reset:active { background: #F0E6DC; }
+  td.hid { background: #E8F0FE; border-color: #90CAF9; }
+  td.hid .cell-eq { color: #7986CB; }
+  td.hid .cell-ans-h { font-size: 18px; display: block; color: #9FA8DA; font-weight: 700; }
+  td.rev { background: #FFF9C4; border-color: var(--sun-dark); }
+  td.rev .cell-eq { color: var(--sun-dark); }
+  td.rev .cell-ans-h { font-size: 14px; display: block; color: var(--sun-dark); font-weight: 700; }
+
+  /* ===== QUIZ PANEL ===== */
+  .dan-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
+  .dan-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .dan-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 2px solid #E0D0C8;
+    background: #fff;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .dan-btn.on { background: var(--sky); border-color: var(--sky-dark); color: #fff; }
+
+  .scores { display: flex; gap: 8px; margin-bottom: 12px; }
+  .score-box {
+    flex: 1;
+    padding: 10px;
+    border-radius: 14px;
+    text-align: center;
+  }
+  .score-box .num { font-size: 26px; font-weight: 700; }
+  .score-box .lbl { font-size: 11px; font-weight: 700; margin-top: 2px; }
+  .sc-ok { background: #E8F5E9; color: #2E7D32; }
+  .sc-ng { background: #FFEBEE; color: #C62828; }
+  .sc-streak { background: #FFF8E1; color: #E65100; }
+
+  .q-card {
+    background: var(--card);
+    border-radius: 22px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 2px solid #F0E6DC;
+    margin-bottom: 12px;
+  }
+  .q-text { font-size: 40px; font-weight: 700; letter-spacing: 4px; color: var(--text); margin-bottom: 18px; }
+  .q-text .num { color: var(--sky-dark); }
+
+  .ans-input {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    width: 130px;
+    padding: 10px 14px;
+    border: 3px solid #E0D0C8;
+    border-radius: 16px;
+    background: #FAFAFA;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    display: block;
+    margin: 0 auto 16px;
+    -webkit-appearance: none;
+  }
+  .ans-input:focus { border-color: var(--sky); background: #fff; }
+  .ans-input.ok { border-color: #4CAF50; background: #E8F5E9; color: #2E7D32; }
+  .ans-input.ng { border-color: #F44336; background: #FFEBEE; color: #C62828; }
+
+  .feedback {
+    font-size: 20px;
+    font-weight: 700;
+    min-height: 32px;
+    margin-bottom: 14px;
+  }
+  .fb-ok { color: #2E7D32; }
+  .fb-ng { color: #C62828; }
+
+  .btn-row { display: flex; gap: 10px; justify-content: center; }
+  .btn-ans {
+    padding: 14px 32px;
+    border-radius: 16px;
+    border: none;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+  }
+  .btn-ans:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.12); }
+  .btn-submit { background: var(--sky); color: #fff; }
+  .btn-next { background: var(--grass); color: #33691E; }
+
+  .progress-wrap { margin-bottom: 8px; }
+  .progress-bar { height: 8px; background: #E0D0C8; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--sky), var(--lavender)); border-radius: 4px; transition: width 0.4s; }
+  .progress-lbl { font-size: 12px; color: var(--muted); text-align: right; margin-top: 3px; font-weight: 700; }
+
+  /* result overlay */
+  .result-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .result-overlay.show { display: flex; }
+  .result-card {
+    background: #fff;
+    border-radius: 28px;
+    padding: 32px 28px;
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  }
+  .result-card .big { font-size: 64px; margin-bottom: 8px; }
+  .result-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .result-card p { font-size: 16px; color: var(--muted); margin-bottom: 20px; }
+  .btn-retry { padding: 14px 36px; background: var(--sky); color: #fff; border: none; border-radius: 16px; font-size: 17px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.12); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="star left">⭐</span>
+  <h1>九九マスター</h1>
+  <span class="star right">⭐</span>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-table" onclick="switchTab('table')">📋 九九表</div>
+  <div class="tab" id="tab-quiz" onclick="switchTab('quiz')">✏️ 練習問題</div>
+  <div class="tab" id="tab-hide" onclick="switchTab('hide')">🙈 かくし表</div>
+</div>
+
+<div class="panels">
+
+  <!-- TABLE PANEL -->
+  <div class="panel active" id="panel-table">
+    <p class="table-hint">タップすると、その段がひかり光ります✨</p>
+    <div class="table-wrap">
+      <table id="kukuTable"></table>
+    </div>
+  </div>
+
+  <!-- HIDDEN TABLE PANEL -->
+  <div class="panel" id="panel-hide">
+    <p class="hide-hint">マスをタップすると答えがひかり光ります✨</p>
+    <button class="hide-reset" onclick="resetHide()">🔄 全部かくす</button>
+    <div class="table-wrap"><table id="hideTable"></table></div>
+  </div>
+
+  <!-- QUIZ PANEL -->
+  <div class="panel" id="panel-quiz">
+    <div class="dan-label">れんしゅうする段をえらぼう</div>
+    <div class="dan-row" id="danRow"></div>
+
+    <div class="scores">
+      <div class="score-box sc-ok">
+        <div class="num" id="sc-ok">0</div>
+        <div class="lbl">⭕ せいかい</div>
+      </div>
+      <div class="score-box sc-ng">
+        <div class="num" id="sc-ng">0</div>
+        <div class="lbl">❌ ふせいかい</div>
+      </div>
+      <div class="score-box sc-streak">
+        <div class="num" id="sc-str">0</div>
+        <div class="lbl">🔥 れんぞく</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+      <div class="progress-lbl" id="progLbl">せいかいりつ 0%</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-text" id="qText">? × ? = ?</div>
+      <input class="ans-input" type="number" id="ansInput" inputmode="numeric" placeholder="?" min="1" max="81" onkeydown="onKey(event)">
+      <div class="feedback" id="feedback"></div>
+      <div class="btn-row">
+        <button class="btn-ans btn-submit" id="btnSubmit" onclick="checkAnswer()">こたえる</button>
+        <button class="btn-ans btn-next" id="btnNext" onclick="nextQ()" style="display:none">つぎへ →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Result overlay -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="big" id="resEmoji">🎉</div>
+    <h2 id="resTitle">すごい！</h2>
+    <p id="resMsg">10問れんぞくせいかい！</p>
+    <button class="btn-retry" onclick="closeResult()">つづける</button>
+  </div>
+</div>
+
+<script>
+// ===== State =====
+let hlR = -1, hlC = -1;
+let selDan = [1,2,3,4,5,6,7,8,9];
+let cntOk = 0, cntNg = 0, streak = 0;
+let curA, curB, done = false;
+
+// ===== Build table =====
+function buildTable() {
+  const t = document.getElementById('kukuTable');
+  let html = '<tr><th></th>';
+  for (let j = 1; j <= 9; j++) html += `<th id="ch${j}">${j}</th>`;
+  html += '</tr>';
+  for (let i = 1; i <= 9; i++) {
+    html += `<tr><th id="rh${i}">${i}のだん</th>`;
+    for (let j = 1; j <= 9; j++) {
+      html += `<td id="c${i}_${j}" onclick="hlCell(${i},${j})"><span class="cell-eq">${i}×${j}</span><span class="cell-ans">${i*j}</span></td>`;
+    }
+    html += '</tr>';
+  }
+  t.innerHTML = html;
+}
+
+function hlCell(r, c) {
+  clearHl();
+  hlR = r; hlC = c;
+  for (let j = 1; j <= 9; j++) {
+    const td = document.getElementById(`c${r}_${j}`);
+    if (td) td.classList.add(j === c ? 'hl-cell' : 'hl-row');
+  }
+  for (let i = 1; i <= 9; i++) {
+    if (i === r) continue;
+    const td = document.getElementById(`c${i}_${c}`);
+    if (td) td.classList.add('hl-col');
+  }
+  const rh = document.getElementById(`rh${r}`);
+  const ch = document.getElementById(`ch${c}`);
+  if (rh) rh.classList.add('hl-h');
+  if (ch) ch.classList.add('hl-h');
+}
+
+function clearHl() {
+  document.querySelectorAll('td.hl-row,td.hl-col,td.hl-cell').forEach(e => e.classList.remove('hl-row','hl-col','hl-cell'));
+  document.querySelectorAll('th.hl-h').forEach(e => e.classList.remove('hl-h'));
+}
+
+// ===== Dan buttons =====
+function buildDan() {
+  const row = document.getElementById('danRow');
+  let html = `<button class="dan-btn on" id="db0" onclick="selectDan(0)">全部</button>`;
+  for (let i = 1; i <= 9; i++) {
+    html += `<button class="dan-btn" id="db${i}" onclick="selectDan(${i})">${i}のだん</button>`;
+  }
+  row.innerHTML = html;
+}
+
+function selectDan(i) {
+  if (i === 0) {
+    selDan = [1,2,3,4,5,6,7,8,9];
+    document.getElementById('db0').classList.add('on');
+    for (let j = 1; j <= 9; j++) document.getElementById(`db${j}`).classList.remove('on');
+  } else {
+    selDan = [i];
+    document.getElementById('db0').classList.remove('on');
+    for (let j = 1; j <= 9; j++) document.getElementById(`db${j}`).classList.toggle('on', j === i);
+  }
+  nextQ();
+}
+
+// ===== Quiz =====
+function nextQ() {
+  done = false;
+  curA = selDan[Math.floor(Math.random() * selDan.length)];
+  curB = Math.floor(Math.random() * 9) + 1;
+  const qt = document.getElementById('qText');
+  qt.innerHTML = `<span class="num">${curA}</span> × <span class="num">${curB}</span> = ?`;
+  const inp = document.getElementById('ansInput');
+  inp.value = '';
+  inp.className = 'ans-input';
+  inp.disabled = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('btnSubmit').style.display = 'inline-block';
+  document.getElementById('btnNext').style.display = 'none';
+  setTimeout(() => { try { inp.focus(); } catch(e){} }, 80);
+}
+
+function checkAnswer() {
+  if (done) return;
+  const inp = document.getElementById('ansInput');
+  const val = parseInt(inp.value, 10);
+  if (isNaN(val)) { inp.focus(); return; }
+  const correct = curA * curB;
+  done = true;
+  inp.disabled = true;
+  document.getElementById('btnSubmit').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'inline-block';
+
+  if (val === correct) {
+    inp.className = 'ans-input ok';
+    document.getElementById('feedback').textContent = '🎉 せいかい！';
+    document.getElementById('feedback').className = 'feedback fb-ok';
+    cntOk++;
+    streak++;
+    if (streak === 5) showResult('🌟', 'すごい！', '5もんれんぞくせいかい！');
+    else if (streak === 10) showResult('🏆', 'かんぺき！', '10もんぜんせいかい！');
+  } else {
+    inp.className = 'ans-input ng';
+    document.getElementById('feedback').textContent = `❌ こたえは ${correct} だよ`;
+    document.getElementById('feedback').className = 'feedback fb-ng';
+    cntNg++;
+    streak = 0;
+  }
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById('sc-ok').textContent = cntOk;
+  document.getElementById('sc-ng').textContent = cntNg;
+  document.getElementById('sc-str').textContent = streak;
+  const total = cntOk + cntNg;
+  const pct = total === 0 ? 0 : Math.round((cntOk / total) * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLbl').textContent = `せいかいりつ ${pct}%`;
+}
+
+function onKey(e) {
+  if (e.key === 'Enter') {
+    if (!done) checkAnswer();
+    else nextQ();
+  }
+}
+
+function showResult(emoji, title, msg) {
+  document.getElementById('resEmoji').textContent = emoji;
+  document.getElementById('resTitle').textContent = title;
+  document.getElementById('resMsg').textContent = msg;
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('show');
+  nextQ();
+}
+
+// ===== Hidden Table =====
+function buildHideTable() {
+  const t = document.getElementById('hideTable');
+  let html = '<tr><th></th>';
+  for (let j = 1; j <= 9; j++) html += `<th>${j}</th>`;
+  html += '</tr>';
+  for (let i = 1; i <= 9; i++) {
+    html += `<tr><th>${i}のだん</th>`;
+    for (let j = 1; j <= 9; j++) {
+      html += `<td id="h${i}_${j}" class="hid" onclick="revealCell(${i},${j})"><span class="cell-eq">${i}×${j}</span><span class="cell-ans-h">?</span></td>`;
+    }
+    html += '</tr>';
+  }
+  t.innerHTML = html;
+}
+function revealCell(r, c) {
+  const td = document.getElementById(`h${r}_${c}`);
+  if (!td) return;
+  if (td.classList.contains('rev')) {
+    td.classList.remove('rev');
+    td.classList.add('hid');
+    td.querySelector('.cell-ans-h').textContent = '?';
+  } else {
+    td.classList.remove('hid');
+    td.classList.add('rev');
+    td.querySelector('.cell-ans-h').textContent = r * c;
+  }
+}
+function resetHide() {
+  for (let i = 1; i <= 9; i++) for (let j = 1; j <= 9; j++) {
+    const td = document.getElementById(`h${i}_${j}`);
+    if (td) { td.className = 'hid'; td.querySelector('.cell-ans-h').textContent = '?'; }
+  }
+}
+
+// ===== Tabs =====
+function switchTab(tab) {
+  ['table','hide','quiz'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+    document.getElementById('panel-'+t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'quiz') setTimeout(() => { try { document.getElementById('ansInput').focus(); } catch(e){} }, 100);
+}
+
+// ===== Init =====
+buildTable();
+buildHideTable();
+buildDan();
+nextQ();
+</script>
+</body>
+</html>
