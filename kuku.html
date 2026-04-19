@@ -33,7 +33,9 @@
   /* Panels */
   .panel { display: none; padding: 12px; }
   .panel.active { display: block; }
-  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-wrap { width: 100%; overflow: hidden; }
+  .table-wrap table { width: 100%; table-layout: fixed; border-spacing: 2px; }
+  .table-wrap td, .table-wrap th { min-width: unset; width: auto; }
   table { border-collapse: separate; border-spacing: 3px; width: 100%; }
   th { font-size: 11px; font-weight: 700; color: #fff; background: var(--sky-dark); padding: 5px 3px; border-radius: 8px; min-width: 30px; text-align: center; }
   td { font-size: 10px; font-weight: 600; text-align: center; padding: 4px 2px; background: #fff; border-radius: 8px; border: 1.5px solid #F0E6DC; cursor: pointer; transition: transform 0.1s; min-width: 46px; line-height: 1.4; }
